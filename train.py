@@ -20,13 +20,16 @@ def eval_metrics(actual, pred):
     rmse = np.sqrt(mean_squared_error(actual, pred))
     mae = mean_absolute_error(actual, pred)
     r2 = r2_score(actual, pred)
-    return rmse, mae, r2
+    medae = median_absolute_error(test_y, predicted_qualities)
+    runtime = time.time() - start_time
+    return rmse, mae, r2, medae, runtime
 
 
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(40)
+    start_time = time.time()
 
     # Read the wine-quality csv file (make sure you're running this from the root of MLflow!)
     wine_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "wine-quality.csv")
@@ -50,17 +53,26 @@ if __name__ == "__main__":
 
         predicted_qualities = lr.predict(test_x)
 
-        (rmse, mae, r2) = eval_metrics(test_y, predicted_qualities)
+        (rmse, mae, r2, medae, runtime) = eval_metrics(test_y, predicted_qualities)
 
         print("Elasticnet model (alpha=%f, l1_ratio=%f):" % (alpha, l1_ratio))
         print("  RMSE: %s" % rmse)
         print("  MAE: %s" % mae)
         print("  R2: %s" % r2)
+        print("  MEDAE: %s" % medae)
+        print("  RUNTIME: %s" %runtime)
 
         mlflow.log_param("alpha", alpha)
         mlflow.log_param("l1_ratio", l1_ratio)
+        mlflow.log_param("train_samples", len(train_x))
+        mlflow.log_param("test_samples", len(test_x))
+        mlflow.log_param("num_features", train_x.shape[1])
+        mlflow.log_param("model_intercept", lr.intercept_)
+        
         mlflow.log_metric("rmse", rmse)
         mlflow.log_metric("r2", r2)
         mlflow.log_metric("mae", mae)
+        mlflow.log_metric("median_absolute_error", medae)
+        mlflow.log_metric("training_runtime_seconds", runtime)
 
         mlflow.sklearn.log_model(lr, "model")
