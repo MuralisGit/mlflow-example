@@ -57,7 +57,7 @@ if __name__ == "__main__":
         time.sleep(15)
 
         predicted_qualities = lr.predict(test_x)
-        residuals = test_y - predicted_qualities
+        residuals = test_y.values.flatten() - predicted_qualities
         signature = infer_signature(train_x, predicted_qualities)
         (rmse, mae, r2, medae, runtime) = eval_metrics(test_y, predicted_qualities)
 
