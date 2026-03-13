@@ -15,7 +15,7 @@ from sklearn.linear_model import ElasticNet
 
 import mlflow
 import mlflow.sklearn
-mlflow.enable_system_metrics_logging()
+#mlflow.enable_system_metrics_logging()
 
 
 def eval_metrics(actual, pred):
