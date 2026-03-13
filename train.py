@@ -9,6 +9,7 @@ import time
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, median_absolute_error
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import ElasticNet
@@ -56,6 +57,7 @@ if __name__ == "__main__":
         time.sleep(15)
 
         predicted_qualities = lr.predict(test_x)
+        residuals = test_y - predicted_qualities
         signature = infer_signature(train_x, predicted_qualities)
         (rmse, mae, r2, medae, runtime) = eval_metrics(test_y, predicted_qualities)
 
@@ -65,6 +67,27 @@ if __name__ == "__main__":
         print("  R2: %s" % r2)
         print("  MEDAE: %s" % medae)
         print("  RUNTIME: %s" %runtime)
+
+        # Predicted vs Actual plot
+        plt.figure()
+
+        plt.scatter(test_y, predicted_qualities, alpha=0.6)
+
+        plt.xlabel("Actual Values")
+        plt.ylabel("Predicted Values")
+        plt.title("Predicted vs Actual Values")
+
+        # Perfect prediction line
+        plt.plot(
+            [test_y.min(), test_y.max()],
+            [test_y.min(), test_y.max()],
+            linestyle="--"
+        )
+        
+        plot_file = "predicted_vs_actual.png"
+        
+        plt.savefig(plot_file)
+        plt.close()
 
         mlflow.log_param("alpha", alpha)
         mlflow.log_param("l1_ratio", l1_ratio)
@@ -78,5 +101,7 @@ if __name__ == "__main__":
         mlflow.log_metric("mae", mae)
         mlflow.log_metric("median_absolute_error", medae)
         mlflow.log_metric("training_runtime_seconds", runtime)
-
+        
+        mlflow.log_artifact(plot_file)
+        
         mlflow.sklearn.log_model(lr, "model", signature=signature)
