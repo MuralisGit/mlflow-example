@@ -15,6 +15,7 @@ from sklearn.linear_model import ElasticNet
 
 import mlflow
 import mlflow.sklearn
+from mlflow.models import infer_signature
 #mlflow.enable_system_metrics_logging()
 
 
@@ -55,7 +56,7 @@ if __name__ == "__main__":
         time.sleep(15)
 
         predicted_qualities = lr.predict(test_x)
-
+        signature = infer_signature(train_x, predicted_qualities)
         (rmse, mae, r2, medae, runtime) = eval_metrics(test_y, predicted_qualities)
 
         print("Elasticnet model (alpha=%f, l1_ratio=%f):" % (alpha, l1_ratio))
@@ -78,4 +79,4 @@ if __name__ == "__main__":
         mlflow.log_metric("median_absolute_error", medae)
         mlflow.log_metric("training_runtime_seconds", runtime)
 
-        mlflow.sklearn.log_model(lr, "model")
+        mlflow.sklearn.log_model(lr, "model", signature=signature)
