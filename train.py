@@ -52,6 +52,7 @@ if __name__ == "__main__":
     with mlflow.start_run(log_system_metrics=True):
         lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=42)
         lr.fit(train_x, train_y)
+        time.sleep(15)
 
         predicted_qualities = lr.predict(test_x)
 
